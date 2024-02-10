@@ -9,7 +9,7 @@ def init_page() -> None:
     st.sidebar.title("Options")
     icon, title = st.columns([3, 20])
     with icon:
-        st.image('weatherchat.jpg')
+        st.image('./imgs/weatherchat.jpg')
     with title:
         st.title('Weather Chat')
 
@@ -76,7 +76,7 @@ def main():
                 for msg in st.session_state.messages:
                     st.chat_message(msg["role"]).write(msg["content"])
 
-                user_query = st.chat_input("Ask about the weather or start a conversation")
+                user_query = st.chat_input(f"Ask about the weather in {city}, {country}")
                 if user_query:
                     st.session_state.messages.append({"role": "user", "content": user_query})
                     st.chat_message("user").write(user_query)
@@ -94,7 +94,7 @@ def main():
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg["content"])
 
-            user_query = st.chat_input("Ask about the weather or start a conversation")
+            user_query = st.chat_input("What is the weather like in Abuja?")
             if user_query:
                 st.session_state.messages.append({"role": "user", "content": user_query})
                 st.chat_message("user").write(user_query)
@@ -105,7 +105,7 @@ def main():
                     st.write(answer)
                 except ValueError as e:
                     st.error('Oops! We are sorry, an error occured will generating answer')
-        st.warning("Location data not provided")
+        st.warning("Location data not provided.")
 
 
 main()

@@ -267,7 +267,8 @@ class WeatherChat:
             res = self.agent.run(query)
             return f"In {self.city}, {self.country}.\n\n"+ res
         except ValueError as e:
-            return self.tool_response
+            add = "Here is a full Weather information:\n\n"
+            return add+self.tool_response
         
 
 def load_openweather(llm):
@@ -284,6 +285,6 @@ def load_openweather(llm):
 def init_messages() -> None:
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
     if clear_button or "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?", "img_path": None}]
+        st.session_state["messages"] = [{"role": "assistant", "content": "What do you want to know about the weather?", "img_path": None}]
     
     
