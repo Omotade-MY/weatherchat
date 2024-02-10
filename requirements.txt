@@ -1,0 +1,9 @@
+openai
+langchain
+langchain_community
+openmeteo_requests
+requests_cache
+pandas
+langchain_experimental
+pyowm
+streamlit
