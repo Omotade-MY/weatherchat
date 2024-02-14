@@ -47,31 +47,46 @@ def main():
     #city = st.sidebar.text_input("Enter City")
     
     #country = st.sidebar.text_input("Enter Country")
+    
+    ip = popup()
 
+    if st.session_state['use_ip']:
+        res_dict = get_coord(ip)
+        city = res_dict['city']
+        country = res_dict['country']
+        region = res_dict['region']
+        lat = res_dict['lat']
+        lon = res_dict['lon']
+    
+        if res_dict:
+            st.sidebar.write(f"Country: {country}")
+            st.sidebar.write(f"Region: {region}")
+            st.sidebar.write(f"City: {city}")
 
-        
-    weather_chat = WeatherChat(ip=None, llm=llm)
-    if weather_chat:
-        chat_agent = weather_chat.initialize()
-        st.session_state['chat_agent'] = chat_agent
+            st.sidebar.write(f"Latitude: {lat}")
+            st.sidebar.write(f"Longitude: {lon}")
 
-        init_messages()
-        for msg in st.session_state.messages:
-            st.chat_message(msg["role"]).write(msg["content"])
+        if lat and lon:
+            weather_chat = WeatherChat(ip="102.91.54.148", llm=llm)
+            if weather_chat:
+                chat_agent = weather_chat.initialize()
+                st.session_state['chat_agent'] = chat_agent
 
-        user_query = st.chat_input(f"Ask about the weather")
-        base = "Below is the chat history between the User and Assistant\n\n"
-        if user_query:
-            st.session_state.messages.append({"role": "User", "content": user_query})
-            st.chat_message("user").write(user_query)
-            try:
-                with st.spinner('Generating'):
-                    all_query = base + '\n'.join([f"{msg['role']}:{msg['content']}" for msg in st.session_state.messages])
-                    answer = chat_agent.run(all_query)
-                    st.session_state.messages.append({"role": "Assistant", "content": answer})
-                st.write(answer)
-            except ValueError as e:
-                st.error('Oops! We are sorry, an error occured will generating answer')
+                init_messages()
+                for msg in st.session_state.messages:
+                    st.chat_message(msg["role"]).write(msg["content"])
+
+                user_query = st.chat_input(f"Ask about the weather in {city}, {country}")
+                if user_query:
+                    st.session_state.messages.append({"role": "user", "content": user_query})
+                    st.chat_message("user").write(user_query)
+                    try:
+                        with st.spinner('Generating'):
+                            answer = chat_agent.run(user_query)
+                            st.session_state.messages.append({"role": "assistant", "content": answer})
+                        st.write(answer)
+                    except ValueError as e:
+                        st.error('Oops! We are sorry, an error occured will generating answer')
     else:
         openweather_agent = load_openweather(llm)
         if openweather_agent:
