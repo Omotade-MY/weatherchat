@@ -2,7 +2,7 @@ import streamlit as st
 from util import get_coord, WeatherChat, open_ai_key, init_messages, load_openweather, start_chat
 from langchain.chat_models import ChatOpenAI
 from langchain_community.llms import Ollama
-
+weather_chat = None
 def init_page() -> None:
     st.set_page_config(
     )
@@ -38,12 +38,12 @@ def main():
     if not st.session_state['use_ip']:
         #consent, user_ip = 
         start_chat()
-        
+        st.stop()
         user_ip = st.session_state['userip']
-        #if user_ip: 
-        weather_chat = WeatherChat(ip=user_ip, llm=llm)
     else:
-        weather_chat = WeatherChat(ip=None, llm=llm)
+    #    if st.session_state['use_ip']:
+        user_ip = st.session_state['userip']
+        weather_chat = WeatherChat(ip=user_ip, llm=llm)
 
     if weather_chat:
         chat_agent = weather_chat.initialize()
