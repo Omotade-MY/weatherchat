@@ -20,8 +20,6 @@ from langchain.tools import BaseTool, StructuredTool, tool
 from datetime import datetime
 import os
 
-
-import streamlit as st
 from langchain_community.utilities import OpenWeatherMapAPIWrapper
 from langchain.agents.react.agent import create_react_agent
 from langchain.memory import ConversationBufferMemory
@@ -35,12 +33,13 @@ os.environ["OPENWEATHERMAP_API_KEY"] = "47fe1d37e973b177509b6441d93bc582"
 
 
 def open_ai_key():
-    with st.sidebar:
-        openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-        "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-        if not openai_api_key:
-            st.info("Please add your OpenAI API key to continue.")
-            st.stop()
+    
+    print("[Get an OpenAI API key](https://platform.openai.com/account/api-keys)")
+    openai_api_key = input("Provide your OpenAI API KEY:> ")
+    
+    if not openai_api_key:
+        print("Please add your OpenAI API key to continue.")
+        open_ai_key()
     os.environ["OPENAI_API_KEY"] = openai_api_key
 
 def randomName():
@@ -200,30 +199,37 @@ class WeatherChat:
 
             return float(res['lat']), float(res['lon'])
         
-
         def get_coord(ip=None):
-            ip = self.ip
-            try:
-                assert ip is not None
-            except AssertionError:
-                st.warning('No IP Found. Permision to use location was not granted')
-                return "No IP Found. The user has not granted permision to use their location"
-            #permission = input()
             
-            import requests
+            ip = self.ip
+            if ip is None:
+                print("NO IP Found")
+                self.ip = input('Please Provide you ip address:> ')
+                ip = self.ip
+                if not self.ip:
+                    return "Location Unknown"
+                
+            permission = input("Allow system to use you ip for location!!\n\nALLOW: 1\nDECLINE: 0")
+            
+            if int(permission) == 1:
+                import requests
 
-            try:
-                url = f"https://ipinfo.io/{self.ip}"
-                res = requests.get(url).json()
+                try:
+                    url = f"https://ipinfo.io/{self.ip}"
+                    res = requests.get(url).json()
 
-                res_dict = {'city':res['city'], 'region':res['region'], 'country':res['country'],
-                        'lat':float(res['loc'].split(',')[0]), 'lon':float(res['loc'].split(',')[1])}
+                    res_dict = {'city':res['city'], 'region':res['region'], 'country':res['country'],
+                            'lat':float(res['loc'].split(',')[0]), 'lon':float(res['loc'].split(',')[1])}
 
 
 
-                return res_dict
-            except Exception as e:
+                    return res_dict
+                except Exception as e:
+                    return None
+            else:
+                print("Permisssion Denied")
                 return None
+        
         def run_daily(query:str)-> str:
 
             """ Use this tool when you need to look up on daily weather forecast"""
@@ -361,7 +367,7 @@ class WeatherChat:
         prompt = hub.pull("hwchase17/react")
         if self.base_prompt is None:
             self.base_prompt = prompt.template
-        prompt.template = """You are a Meteorologist and an expert in giving weather reports and analysis\n You will be having a nice weather conversation with a Human. If it's a greeting then respond with a greetin. Your response should be conclusive and accurate.\n Before answering any question you must determine the location to check up the weather information. The location may be provided in the question, or it may be in the context. If you are not able to determine the location then you will assume the user is asking on their current location\n\n""" + self.base_prompt
+        prompt.template = """You are a Meteorologist and an expert in giving weather reports and analysis\n You will be having a nice weather conversation with a Human. If it's a greeting then respond with a greetin. Your response should be conclusive and accurate.\n Before answering any question you must determine the location to check up the weather information. The location may be provided in the question, or it may be in the context. If you are not able to determine the location then you will assume the user is asking on their current location. When you know the answer then return it immediatley\n\n""" + self.base_prompt
         llm = self.llm #ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613", openai_api_key = "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")
 
         # Construct the ReAct agent
@@ -375,6 +381,7 @@ class WeatherChat:
     
     def run(self, query):
         base = ""
+        self.query = query
         res = self.agent.invoke({'input':query})
         self.response = res
         return res['output']
@@ -394,72 +401,3 @@ def load_openweather(llm):
     )
     
     return agent_chain
-import ipaddress
-
-def is_valid_ip(ip_address):
-    try:
-        # Attempt to create an IPv4 or IPv6 address object
-        ipaddress.ip_address(ip_address)
-        # If successful, return True
-        return True
-    except ValueError:
-        # If an error is raised (invalid IP address), return False
-        return False
-
-def init_messages() -> None:
-    clear_button = st.sidebar.button("Clear Conversation", key="clear")
-    if clear_button or "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "assistant", 
-                                         "content": "Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n Answer with YES or NO"}]
-
-def start_chat() -> None:
-    st.session_state['userip'] = None
-    st.session_state["messages"] = [{"role": "assistant", 
-                                         "content": "Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n Answer with YES or NO"}]
-    
-    st.chat_message("assistant").write("Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n\n Answer with YES or NO")
-    consent = st.chat_input("Enter 'yes' or 'no'")
-    if consent:
-        consent = consent.strip()
-        st.session_state.messages.append({"role": "User", "content": consent})
-        st.chat_message("user").write(consent)
-
-        while consent.lower() not in ("yes", "no"):
-            st.write("Please respond only with 'yes' or 'no'")
-            st.session_state.messages.append({"role": "Assistant", "content": "Please respond only with 'yes' or 'no'"})
-            
-            consent = st.chat_input("Enter 'yes' or 'no'")
-            st.session_state.messages.append({"role": "User", "content": consent})
-            st.chat_message("user").write(consent)
-
-        else:
-            if consent.lower() == "yes":
-                st.session_state['use_ip'] = True
-                st.write("Please provide your IP address to continue")
-                st.session_state.messages.append({"role": "Assistant", "content": "Please provide your IP address to continue"})
-            
-
-
-                user_ip = st.chat_input("Enter your IP address e.g 192.168.1.1 ")
-                if user_ip:
-                    st.session_state.messages.append({"role": "User", "content": user_ip})
-                    st.chat_message("user").write(user_ip)
-
-
-                    # Continue asking for IP address until it's valid
-                    while not is_valid_ip(user_ip):
-                        st.write("The IP address you have provided is not valid. Please provide a valid IP address to continue")
-                        st.session_state.messages.append({"role": "Assistant", "content": "The IP address you have provided is not valid. Please provide a valid IP address to continue"})
-                        
-                        
-                        user_ip = st.chat_input("Enter your IP address e.g 192.168.1.1 ")
-                        if user_ip:
-                            st.session_state.messages.append({"role": "User", "content": user_ip})
-                            st.chat_message("user").write(user_ip)
-                    else:
-                        st.session_state['userip'] = user_ip
-                  #  return True, user_ip
-           # else:
-              #  False, None
-    #else:
-        #st.stop()
