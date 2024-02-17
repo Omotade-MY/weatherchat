@@ -31,8 +31,8 @@ def start_chat() -> None:
     print("Entered Start Cart")
     if (st.session_state['use_ip'] is None) or (st.session_state['userip'] is None):
         st.session_state["messages"] = [{"role": "assistant", 
-                                            "content": "Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n Answer with YES or NO"}]
-        st.chat_message("assistant").write("Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n\n Answer with YES or NO")
+                                            "content": "Welcome to WeatherChat!! We need your permission to use your IP address to provide weather information for your current location. May we proceed? .\n Answer with YES or NO"}]
+        st.chat_message("assistant").write("Welcome to WeatherChat!! We need your permission to use your IP address to provide weather information for your current location. May we proceed?")
     
     consent = st.chat_input("Enter 'yes' or 'no'")
     
