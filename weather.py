@@ -46,9 +46,6 @@ def start_chat() -> None:
 
         if consent.strip().lower() == "yes":
             st.session_state['use_ip'] = True
-            st.chat_message('assistant').write("Please provide your IP address to continue")
-            st.session_state.messages.append({"role": "assistant", "content": "Please provide your IP address to continue"})
-            
             
         elif consent.strip().lower() == "no":
             st.session_state['use_ip'] = False
@@ -57,10 +54,11 @@ def start_chat() -> None:
             return
 
     if (st.session_state['use_ip']) and (not st.session_state['userip']):
-        #user_ip = None
-        #print(st.session_state['started'])
-        
+        print("WE GOT HERE")
+        st.chat_message('assistant').write("Please provide your IP address to continue")
+        st.session_state.messages.append({"role": "assistant", "content": "Please provide your IP address to continue"})
         user_ip = st.chat_input("Enter your IP address e.g 192.168.1.1 ")
+
         print(user_ip)
         print(type(user_ip))
         if user_ip :
@@ -72,6 +70,7 @@ def start_chat() -> None:
                 if st.session_state['userip'] is None:
                     st.session_state['userip'] = user_ip.strip()
                 st.session_state['started'] = True
+                st.chat_message('assistant').write("Thank, Enter any key to continue")
                 
                 
             else:
@@ -97,8 +96,8 @@ def main():
     else:
         llm = Ollama(model='llama2')
 
-    print(st.session_state['started'])
-    #print(st.session_state['use_ip'])
+    #print(st.session_state['started'])
+    
     if (not st.session_state['started']): 
         start_chat()
     else:
