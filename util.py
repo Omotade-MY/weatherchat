@@ -4,7 +4,7 @@ import requests_cache
 import pandas as pd
 from retry_requests import retry
 from typing import Optional, Type
-
+import threading
 cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
 retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
 openmeteo = openmeteo_requests.Client(session = retry_session)
@@ -29,8 +29,8 @@ from langchain.schema import AIMessage, HumanMessage
 from langchain import hub
 from langchain.agents import AgentExecutor
 from langchain.agents import AgentType, initialize_agent, load_tools
-
-#os.environ["OPENWEATHERMAP_API_KEY"] = "47fe1d37e973b177509b6441d93bc582"
+import numpy as np
+os.environ["OPENWEATHERMAP_API_KEY"] = "47fe1d37e973b177509b6441d93bc582"
 
 
 
@@ -43,6 +43,15 @@ def open_ai_key():
             st.stop()
     os.environ["OPENAI_API_KEY"] = openai_api_key
 
+def randomName():
+    n = []
+    n.append(np.random.choice(['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']).upper())
+    n.append(str(np.random.randint(1,9)))                                 
+    n.append(str(np.random.randint(1,9)))   
+    n.append(np.random.choice(['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']))         
+    n.append(np.random.choice(['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']).upper())  
+
+    return ''.join(n)       
 
 def get_coord(ip):
     import requests
@@ -191,39 +200,30 @@ class WeatherChat:
 
             return float(res['lat']), float(res['lon'])
         
+
         def get_coord(ip=None):
             ip = self.ip
-            if ip is None:
-                print("NO IP Found")
-                self.ip = st.text_input('Please Provide you ip address:> ')
-                #self.ip = input('Please Provide you ip address:> ')
-                if not self.ip:
-                    st.stop()
-                    return "Location Unknown"
-
-            permssion = st.radio("Allow system to use you ip for location!!", 
-                     options=["Allow", "Reject"])
+            try:
+                assert ip is not None
+            except AssertionError:
+                st.warning('No IP Found. Permision to use location was not granted')
+                return "No IP Found. The user has not granted permision to use their location"
+            #permission = input()
             
-            permission = input()
-            if permission == "Allow":
-                import requests
+            import requests
 
-                try:
-                    url = f"https://ipinfo.io/{self.ip}"
-                    res = requests.get(url).json()
+            try:
+                url = f"https://ipinfo.io/{self.ip}"
+                res = requests.get(url).json()
 
-                    res_dict = {'city':res['city'], 'region':res['region'], 'country':res['country'],
-                            'lat':float(res['loc'].split(',')[0]), 'lon':float(res['loc'].split(',')[1])}
+                res_dict = {'city':res['city'], 'region':res['region'], 'country':res['country'],
+                        'lat':float(res['loc'].split(',')[0]), 'lon':float(res['loc'].split(',')[1])}
 
 
 
-                    return res_dict
-                except Exception as e:
-                    return None
-            else:
-                print("Permisssion Denied")
+                return res_dict
+            except Exception as e:
                 return None
-        
         def run_daily(query:str)-> str:
 
             """ Use this tool when you need to look up on daily weather forecast"""
@@ -310,20 +310,22 @@ class WeatherChat:
             try:
                 
                 weather_data = weather.run(loc)
+                print(loc)
+                return weather_data
+            
             except Exception as e:
                 print(str(e))
                 loc = get_coord()
                 loc = ', '.join([locs['city'],locs['country']])
             
-            print(loc)
-            return weather_data
+            
 
 
         def greet(greeting):
             #llm = self.llm #ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613", openai_api_key = "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")
             #res = llm.invoke(greeting)
             #return res.content
-            return "Hello!, This is Weather Chat, How may I help you with your weather questions"
+            return "Hello!, This is Weather Chat, How may I help you with your weather questions?"
 
 
 
@@ -335,7 +337,7 @@ class WeatherChat:
                 Tool.from_function(
                                 greet,
                                 name='greet',
-                                description = "Usefull for responding to greetings or frendly conversation. The input to this function is the complete message string "
+                                description = "Use this too only  for responding to greetings. This tool does not require an input"
                 ),
                 Tool.from_function(
                                 get_coord,
@@ -359,7 +361,7 @@ class WeatherChat:
         prompt = hub.pull("hwchase17/react")
         if self.base_prompt is None:
             self.base_prompt = prompt.template
-        prompt.template = """You are a Meteorologist and an expert in giving weather reports and analysis\n You will be having a nice weather conversation with a Human. If it's a greeting then respond with a greetin. Your response should be conclusive and accurate.\n Before answering any question you must determine the location to check up the weather information. The location may be provided in the question, or it may be in the context. If you are not able to determine the location then you will assume the user is asking on their current location\n\n""" + self.base_prompt
+        prompt.template = """As an expert meteorologist, you'll engage in detailed and accurate weather discussions with a human. You must always detemine the location for the weather analysis. The location may be provided directly or implied in the context. In cases where it's unclear, assume the user refers to their current location. However, if you are greeted then you simply respond with a greeting  and stop.\n\n""" + self.base_prompt
         llm = self.llm #ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613", openai_api_key = "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")
 
         # Construct the ReAct agent
@@ -374,7 +376,9 @@ class WeatherChat:
     def run(self, query):
         base = ""
         res = self.agent.invoke({'input':query})
+        self.response = res
         return res['output']
+    
     
     
     
@@ -390,10 +394,21 @@ def load_openweather(llm):
     )
     
     return agent_chain
+import ipaddress
+
+def is_valid_ip(ip_address):
+    try:
+        # Attempt to create an IPv4 or IPv6 address object
+        ipaddress.ip_address(ip_address)
+        # If successful, return True
+        return True
+    except ValueError:
+        # If an error is raised (invalid IP address), return False
+        return False
 
 def init_messages() -> None:
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
+    
     if clear_button or "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "assistant", "content": "What do you want to know about the weather?", "img_path": None}]
-    
-    
+        st.session_state["messages"] = [{"role": "assistant", 
+                                         "content": "Welcome to WeatherChat!! What do you want to know about the weather?"}]
