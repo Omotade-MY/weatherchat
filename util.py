@@ -325,7 +325,7 @@ class WeatherChat:
             #llm = self.llm #ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613", openai_api_key = "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")
             #res = llm.invoke(greeting)
             #return res.content
-            return "Hello!, This is Weather Chat, How may I help you with your weather questions"
+            return "Hello!, This is Weather Chat, How may I help you with your weather questions?"
 
 
 
@@ -361,7 +361,7 @@ class WeatherChat:
         prompt = hub.pull("hwchase17/react")
         if self.base_prompt is None:
             self.base_prompt = prompt.template
-        prompt.template = """You are a Meteorologist and an expert in giving weather reports and analysis\n You will be having a nice weather conversation with a Human. If it's a greeting then respond with a greetin. Your response should be conclusive and accurate.\n Before answering any question you must determine the location to check up the weather information. The location may be provided in the question, or it may be in the context. If you are not able to determine the location then you will assume the user is asking on their current location\n\n""" + self.base_prompt
+        prompt.template = """As an expert meteorologist, you'll engage in detailed and accurate weather discussions with a human. You must always detemine the location for the weather analysis. The location may be provided directly or implied in the context. In cases where it's unclear, assume the user refers to their current location. However if you are greeted then you simply respond with a greeting.\n\n""" + self.base_prompt
         llm = self.llm #ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613", openai_api_key = "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")
 
         # Construct the ReAct agent
@@ -408,58 +408,7 @@ def is_valid_ip(ip_address):
 
 def init_messages() -> None:
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
+    
     if clear_button or "messages" not in st.session_state:
         st.session_state["messages"] = [{"role": "assistant", 
-                                         "content": "Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n Answer with YES or NO"}]
-
-def start_chat() -> None:
-    st.session_state['userip'] = None
-    st.session_state["messages"] = [{"role": "assistant", 
-                                         "content": "Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n Answer with YES or NO"}]
-    
-    st.chat_message("assistant").write("Welcome to WeatherChat!! Before we continue, allow Weather Chat to use your location for weather lookup.\n\n Answer with YES or NO")
-    consent = st.chat_input("Enter 'yes' or 'no'")
-    if consent:
-        consent = consent.strip()
-        st.session_state.messages.append({"role": "User", "content": consent})
-        st.chat_message("user").write(consent)
-
-        while consent.lower() not in ("yes", "no"):
-            st.write("Please respond only with 'yes' or 'no'")
-            st.session_state.messages.append({"role": "Assistant", "content": "Please respond only with 'yes' or 'no'"})
-            
-            consent = st.chat_input("Enter 'yes' or 'no'")
-            st.session_state.messages.append({"role": "User", "content": consent})
-            st.chat_message("user").write(consent)
-
-        else:
-            if consent.lower() == "yes":
-                st.session_state['use_ip'] = True
-                st.write("Please provide your IP address to continue")
-                st.session_state.messages.append({"role": "Assistant", "content": "Please provide your IP address to continue"})
-            
-
-
-                user_ip = st.chat_input("Enter your IP address e.g 192.168.1.1 ")
-                if user_ip:
-                    st.session_state.messages.append({"role": "User", "content": user_ip})
-                    st.chat_message("user").write(user_ip)
-
-
-                    # Continue asking for IP address until it's valid
-                    while not is_valid_ip(user_ip):
-                        st.write("The IP address you have provided is not valid. Please provide a valid IP address to continue")
-                        st.session_state.messages.append({"role": "Assistant", "content": "The IP address you have provided is not valid. Please provide a valid IP address to continue"})
-                        
-                        
-                        user_ip = st.chat_input("Enter your IP address e.g 192.168.1.1 ")
-                        if user_ip:
-                            st.session_state.messages.append({"role": "User", "content": user_ip})
-                            st.chat_message("user").write(user_ip)
-                    else:
-                        st.session_state['userip'] = user_ip
-                  #  return True, user_ip
-           # else:
-              #  False, None
-    #else:
-        #st.stop()
+                                         "content": "Welcome to WeatherChat!! What do you want to know about the weather?"}]
