@@ -1,1 +1,7 @@
+# Ignore specific files
+
+.cache.sqlite
 .env
+
+# Ignore Python cache
+__pycache__
