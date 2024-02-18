@@ -47,7 +47,7 @@ def start_chat() -> None:
 
             if consent.strip().lower() == "yes":
                 st.session_state['use_ip'] = True
-            
+                st.rerun()
             elif consent.strip().lower() == "no":
                 st.session_state['use_ip'] = False
                 st.session_state['started'] = True
