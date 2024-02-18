@@ -144,25 +144,8 @@ def main():
                 except openai.RateLimitError as rate_err:
                     err = str(rate_err)
                     st.warning(err)
-        else:
-            openweather_agent = load_openweather(llm)
-            if openweather_agent:
-                init_messages()
-                for msg in st.session_state.messages:
-                    st.chat_message(msg["role"]).write(msg["content"])
-
-                user_query = st.chat_input("What is the weather like in Abuja?")
-                if user_query:
-                    st.session_state.messages.append({"role": "user", "content": user_query})
-                    st.chat_message("user").write(user_query)
-                    try:
-                        with st.spinner('Generating'):
-                            answer = openweather_agent.run(user_query)
-                            st.session_state.messages.append({"role": "assistant", "content": answer})
-                        st.write(answer)
-                    except ValueError as e:
-                        st.error('Oops! We are sorry, an error occured will generating answer')
-            st.warning("Location data not provided.")
+                except openai.AuthenticationError as auth_err:
+                    st.warning(str(auth_err))
 
 
 main()
