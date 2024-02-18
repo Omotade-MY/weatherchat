@@ -74,7 +74,7 @@ def start_chat() -> None:
                 if st.session_state['userip'] is None:
                     st.session_state['userip'] = user_ip.strip()
                 st.session_state['started'] = True
-										    st.session_state["messages"] = [] 
+                st.session_state["messages"] = [] 
                 st.rerun()
 
             else:
