@@ -50,6 +50,9 @@ def start_chat() -> None:
         elif consent.strip().lower() == "no":
             st.session_state['use_ip'] = False
             st.session_state['started'] = True
+            st.session_state["messages"] = []
+            st.rerun()
+
         else:
             return
 
@@ -71,20 +74,16 @@ def start_chat() -> None:
                 if st.session_state['userip'] is None:
                     st.session_state['userip'] = user_ip.strip()
                 st.session_state['started'] = True
-                #st.chat_message('assistant').write("Thank, Enter any key to continue: ")
-                
+                st.session_state["messages"] = [] 
+                st.rerun()
+
             else:
                 st.chat_message('assistant').write("The IP address you have provided is not valid. Please provide a valid IP address to continue")
                 st.session_state.messages.append({"role": "assistant", "content": "The IP address you have provided is not valid. Please provide a valid IP address to continue"})
 
-    if st.session_state['started']:
-        st.session_state["messages"] = [{"role": "assistant", 
-                                         "content": "Welcome to WeatherChat!! What do you want to know about the weather?"}]
+  
         
-    st.rerun()
-
-        #    st.chat_message('assistant').write("Please provide your IP address to continue")
-
+    
 
 def main():
     weather_chat = None

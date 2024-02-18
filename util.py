@@ -409,6 +409,6 @@ def is_valid_ip(ip_address):
 def init_messages() -> None:
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
     
-    if clear_button or "messages" not in st.session_state:
+    if clear_button or not st.session_state["messages"]:
         st.session_state["messages"] = [{"role": "assistant", 
                                          "content": "Welcome to WeatherChat!! What do you want to know about the weather?"}]
