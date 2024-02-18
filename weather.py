@@ -145,7 +145,8 @@ def main():
                     err = str(rate_err)
                     st.warning(err)
                 except openai.AuthenticationError as auth_err:
-                    st.warning(str(auth_err))
+                    st.error("OpenAI authentication error. Please check your OpenAI API Key" 
+                    #st.warning(str(auth_err))
 
 
 main()
