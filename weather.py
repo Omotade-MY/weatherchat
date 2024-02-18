@@ -34,27 +34,28 @@ def start_chat() -> None:
                                             "content": "Welcome to WeatherChat!! We need your permission to use your IP address to provide weather information for your current location. May we proceed? .\n Answer with YES or NO"}]
         st.chat_message("assistant").write("Welcome to WeatherChat!! We need your permission to use your IP address to provide weather information for your current location. May we proceed?")
     
-    consent = st.chat_input("Enter 'yes' or 'no'")
+    if (st.session_state['use_ip'] is None):
+        consent = st.chat_input("Enter 'yes' or 'no'")
     
-    if consent:
-        st.session_state.messages.append({"role": "user", "content":consent})
+        if consent:
+            st.session_state.messages.append({"role": "user", "content":consent})
             
-        if consent.strip().lower() not in ("yes", "no"):
-            st.chat_message('assistant').write("Please respond only with 'yes' or 'no'")
-            st.session_state.messages.append({"role": "assistant", "content": "Please respond only with 'yes' or 'no'"})
+            if consent.strip().lower() not in ("yes", "no"):
+                st.chat_message('assistant').write("Please respond only with 'yes' or 'no'")
+                st.session_state.messages.append({"role": "assistant", "content": "Please respond only with 'yes' or 'no'"})
             
 
-        if consent.strip().lower() == "yes":
-            st.session_state['use_ip'] = True
+            if consent.strip().lower() == "yes":
+                st.session_state['use_ip'] = True
             
-        elif consent.strip().lower() == "no":
-            st.session_state['use_ip'] = False
-            st.session_state['started'] = True
-            st.session_state["messages"] = []
-            st.rerun()
+            elif consent.strip().lower() == "no":
+                st.session_state['use_ip'] = False
+                st.session_state['started'] = True
+                st.session_state["messages"] = []
+                st.rerun()
 
-        else:
-            return
+            else:
+                return
 
     if (st.session_state['use_ip']) and (not st.session_state['userip']):
         print("WE GOT HERE")
