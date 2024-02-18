@@ -361,7 +361,7 @@ class WeatherChat:
         prompt = hub.pull("hwchase17/react")
         if self.base_prompt is None:
             self.base_prompt = prompt.template
-        prompt.template = """As an expert meteorologist, you'll engage in detailed and accurate weather discussions with a human. You must always detemine the location for the weather analysis. The location may be provided directly or implied in the context. In cases where it's unclear, assume the user refers to their current location. However, if you are greeted then you simply respond with a greeting  and stop.\n\n""" + self.base_prompt
+        prompt.template = """As an expert meteorologist, you'll provide detailed and accurate weather information. You must always detemine the location for the weather analysis. The location may be provided directly or implied in the context. In cases where it's unclear, assume the user refers to their current location. However, if you are greeted then you simply respond with a greeting  and stop.\n\n""" + self.base_prompt
         llm = self.llm #ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613", openai_api_key = "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")
 
         # Construct the ReAct agent

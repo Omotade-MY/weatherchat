@@ -61,6 +61,7 @@ def start_chat() -> None:
 
         print(user_ip)
         print(type(user_ip))
+
         if user_ip :
             print(user_ip)
             st.chat_message('user').write(user_ip)
@@ -70,8 +71,7 @@ def start_chat() -> None:
                 if st.session_state['userip'] is None:
                     st.session_state['userip'] = user_ip.strip()
                 st.session_state['started'] = True
-                st.chat_message('assistant').write("Thank, Enter any key to continue")
-                
+                #st.chat_message('assistant').write("Thank, Enter any key to continue: ")
                 
             else:
                 st.chat_message('assistant').write("The IP address you have provided is not valid. Please provide a valid IP address to continue")
@@ -80,6 +80,8 @@ def start_chat() -> None:
     if st.session_state['started']:
         st.session_state["messages"] = [{"role": "assistant", 
                                          "content": "Welcome to WeatherChat!! What do you want to know about the weather?"}]
+        
+    st.rerun()
 
         #    st.chat_message('assistant').write("Please provide your IP address to continue")
 
