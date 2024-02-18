@@ -8,3 +8,6 @@ pandas
 langchain_experimental
 pyowm
 streamlit
+langchainhub
+langchain_openai
+numpy
