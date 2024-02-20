@@ -11,3 +11,4 @@ streamlit
 langchainhub
 langchain_openai
 numpy
+tabulate
