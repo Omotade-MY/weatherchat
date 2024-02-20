@@ -310,8 +310,9 @@ class WeatherChat:
                     st.session_state['started'] = False
                     st.rerun()
                     return 'No User Location Available'
-                else:
-                    loc = ', '.join([locs['city'],locs['country']])
+                
+            
+                loc = ', '.join([locs['city'],locs['country']])
             #elif loc.split()
             
             
@@ -326,7 +327,7 @@ class WeatherChat:
             except Exception as e:
                 print(str(e))
 
-                st.erro(f"Error occured while looking up weather for {loc}")
+                st.error(f"Error occured while looking up weather for {loc}")
             
 
 
