@@ -326,7 +326,7 @@ class WeatherChat:
             except Exception as e:
                 print(str(e))
 
-                st.erro(f"Error occured while looking up weather for {loc}")
+                st.error(f"Error occured while looking up weather for {loc}")
             
 
 
