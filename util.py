@@ -74,7 +74,6 @@ class WeatherChat:
         #self.city = city
         self.country = None
         self.__name__ = f"User@{ip}"
-        self.openai_key =  "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"
         self.llm = llm
         self.ip = ip
         #self.lat = lat
@@ -205,14 +204,7 @@ class WeatherChat:
             ip = self.ip
             try:
                 assert ip is not None
-            except AssertionError:
-                st.warning('No IP Found. Permision to use location was not granted')
-                return "No IP Found. The user has not granted permision to use their location"
-            #permission = input()
-            
-            import requests
-
-            try:
+                import requests
                 url = f"https://ipinfo.io/{self.ip}"
                 res = requests.get(url).json()
 
@@ -222,8 +214,19 @@ class WeatherChat:
 
 
                 return res_dict
+            
+            except AssertionError:
+                st.warning('No IP Found. Permision to use location was not granted')
+
+                st.chat_message('assistant').write("You have not granted permission to use your location.")
+                
+                st.session_state['started'] = False
+                return "No IP Found. The user has not granted permision to use their location"
+            
             except Exception as e:
                 return None
+            
+            
         def run_daily(query:str)-> str:
 
             """ Use this tool when you need to look up on daily weather forecast"""
@@ -299,9 +302,16 @@ class WeatherChat:
         def chat_openweather(loc):
     
             if loc.lower() in ['current_location', 'current location']:
+
                 locs = get_coord()
-            
-                loc = ', '.join([locs['city'],locs['country']])
+                if locs == "No IP Found. The user has not granted permision to use their location":
+                    #st.write("You have not granted permission to use your location. Do you want Weather Chat to use your location?")
+                    #consent = st.chat_input("Enter 'yes' or 'no'")
+                    st.session_state['started'] = False
+                    st.rerun()
+                    return 'No User Location Available'
+                else:
+                    loc = ', '.join([locs['city'],locs['country']])
             #elif loc.split()
             
             
@@ -315,9 +325,8 @@ class WeatherChat:
             
             except Exception as e:
                 print(str(e))
-                loc = get_coord()
-                loc = ', '.join([locs['city'],locs['country']])
-            
+
+                st.erro(f"Error occured while looking up weather for {loc}")
             
 
 
@@ -326,6 +335,10 @@ class WeatherChat:
             #res = llm.invoke(greeting)
             #return res.content
             return "Hello!, This is Weather Chat, How may I help you with your weather questions?"
+        
+        def ask_user_loc(input = None):
+            
+            return "Do you want Weather Chat to user your location"
 
 
 
@@ -409,6 +422,6 @@ def is_valid_ip(ip_address):
 def init_messages() -> None:
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
     
-    if clear_button or not st.session_state["messages"]:
+    if clear_button or not st.session_state.get("messages"):
         st.session_state["messages"] = [{"role": "assistant", 
                                          "content": "Welcome to WeatherChat!! What do you want to know about the weather?"}]

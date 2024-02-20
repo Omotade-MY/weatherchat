@@ -25,24 +25,29 @@ if not st.session_state.get('userip'):
 if not st.session_state.get('started'):
     st.session_state['started'] = False
 
+if not st.session_state.get('start_count'):
+    st.session_state['start_count'] = 0
+
 #st.session_state['started'] = False
 
 def start_chat() -> None:
     print("Entered Start Cart")
     if (st.session_state['use_ip'] is None) or (st.session_state['userip'] is None):
-        st.session_state["messages"] = [{"role": "assistant", 
-                                            "content": "Welcome to WeatherChat!! We need your permission to use your IP address to provide weather information for your current location. May we proceed? .\n Answer with YES or NO"}]
-        st.chat_message("assistant").write("Welcome to WeatherChat!! We need your permission to use your IP address to provide weather information for your current location. May we proceed?")
+        st.session_state["pre_messages"] = [{"role": "assistant", 
+                                            "content": "Welcome to WeatherChat!! To continue, We need your permission to use your IP address to provide weather information for your current location. May we proceed? .\n Answer with YES or NO"}]
+        st.chat_message("assistant").write("Welcome to WeatherChat!! To continue, We need your permission to use your IP address to provide weather information for your current location. May we proceed?")
     
     if (st.session_state['use_ip'] is None):
         consent = st.chat_input("Enter 'yes' or 'no'")
     
         if consent:
-            st.session_state.messages.append({"role": "user", "content":consent})
+            st.chat_message('user').write(consent)
+            st.session_state.pre_messages.append({"role": "user", "content":consent})
+            
             
             if consent.strip().lower() not in ("yes", "no"):
                 st.chat_message('assistant').write("Please respond only with 'yes' or 'no'")
-                st.session_state.messages.append({"role": "assistant", "content": "Please respond only with 'yes' or 'no'"})
+                st.session_state.pre_messages.append({"role": "assistant", "content": "Please respond only with 'yes' or 'no'"})
             
 
             if consent.strip().lower() == "yes":
@@ -51,7 +56,8 @@ def start_chat() -> None:
             elif consent.strip().lower() == "no":
                 st.session_state['use_ip'] = False
                 st.session_state['started'] = True
-                st.session_state["messages"] = []
+                st.session_state['start_count'] += 1
+                #st.session_state["pre_messages"] = []
                 st.rerun()
 
             else:
@@ -60,7 +66,7 @@ def start_chat() -> None:
     if (st.session_state['use_ip']) and (not st.session_state['userip']):
         print("WE GOT HERE")
         st.chat_message('assistant').write("Please provide your IP address to continue")
-        st.session_state.messages.append({"role": "assistant", "content": "Please provide your IP address to continue"})
+        st.session_state.pre_messages.append({"role": "assistant", "content": "Please provide your IP address to continue"})
         user_ip = st.chat_input("Enter your IP address e.g 192.168.1.1 ")
 
         print(user_ip)
@@ -69,20 +75,21 @@ def start_chat() -> None:
         if user_ip :
             print(user_ip)
             st.chat_message('user').write(user_ip)
-            st.session_state.messages.append({"role": "user", "content": user_ip})
+            st.session_state.pre_messages.append({"role": "user", "content": user_ip})
             
             if is_valid_ip(user_ip.strip()):
                 if st.session_state['userip'] is None:
                     st.session_state['userip'] = user_ip.strip()
                 st.session_state['started'] = True
-                st.session_state["messages"] = [] 
+                st.session_state['start_count'] += 1
+                #st.session_state["pre_messages"] = [] 
                 st.rerun()
 
             else:
                 st.chat_message('assistant').write("The IP address you have provided is not valid. Please provide a valid IP address to continue")
-                st.session_state.messages.append({"role": "assistant", "content": "The IP address you have provided is not valid. Please provide a valid IP address to continue"})
+                st.session_state.pre_messages.append({"role": "assistant", "content": "The IP address you have provided is not valid. Please provide a valid IP address to continue"})
 
-  
+    
         
     
 
@@ -122,6 +129,9 @@ def main():
             st.session_state['chat_agent'] = chat_agent
             
             init_messages()
+            if (st.session_state['userip']) and (st.session_state['start_count'] > 0):
+                    st.session_state.messages.append({"role": "Assistant", "content": "You have provided your IP, you may now continue"})
+                
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg["content"])
 
