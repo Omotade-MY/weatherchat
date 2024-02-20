@@ -97,13 +97,13 @@ def main():
     weather_chat = None
     init_page()
 
-    model_choice = st.sidebar.radio("Select a Model", ("openai gpt-3.5", "llama2"))
+    model_choice = st.sidebar.radio("Select a Model", ("openai gpt-3.5", "mistral"))
     if model_choice == "openai gpt-3.5":
         open_ai_key()
         llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
 
     else:
-        llm = Ollama(model='llama2')
+        llm = Ollama(model='mistral')
 
     #print(st.session_state['started'])
     
