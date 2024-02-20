@@ -310,8 +310,9 @@ class WeatherChat:
                     st.session_state['started'] = False
                     st.rerun()
                     return 'No User Location Available'
-                else:
-                    loc = ', '.join([locs['city'],locs['country']])
+                
+            
+                loc = ', '.join([locs['city'],locs['country']])
             #elif loc.split()
             
             

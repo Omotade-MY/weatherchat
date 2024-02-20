@@ -83,6 +83,9 @@ def start_chat() -> None:
                 st.session_state['started'] = True
                 st.session_state['start_count'] += 1
                 #st.session_state["pre_messages"] = [] 
+                if (st.session_state['userip']) and (st.session_state['start_count'] > 0):
+                    st.session_state.messages.append({"role": "Assistant", "content": "You have provided your IP, you may now continue"})
+                
                 st.rerun()
 
             else:
@@ -129,9 +132,7 @@ def main():
             st.session_state['chat_agent'] = chat_agent
             
             init_messages()
-            if (st.session_state['userip']) and (st.session_state['start_count'] > 0):
-                    st.session_state.messages.append({"role": "Assistant", "content": "You have provided your IP, you may now continue"})
-                
+            
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg["content"])
 
