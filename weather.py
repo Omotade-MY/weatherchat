@@ -81,7 +81,7 @@ def start_chat() -> None:
                 if st.session_state['userip'] is None:
                     st.session_state['userip'] = user_ip.strip()
                 st.session_state['started'] = True
-                st.session_state['start_count'] += 1
+                #st.session_state['start_count'] += 1
                 #st.session_state["pre_messages"] = [] 
                 if (st.session_state['userip']) and (st.session_state['start_count'] > 0):
                     st.session_state.messages.append({"role": "Assistant", "content": "You have provided your IP, you may now continue"})
